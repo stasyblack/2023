@@ -1,13 +1,15 @@
 from osgeo import gdal
 import numpy as np
 
+
+
 def split_image(image_path, tile_size, overlap):
     dataset = gdal.Open(image_path)
     width = dataset.RasterXSize
     height = dataset.RasterYSize
     num_blocks_x = int(np.ceil((width - overlap) / (tile_size - overlap)))
     num_blocks_y = int(np.ceil((height - overlap) / (tile_size - overlap)))
-    tile = np.zeros((num_blocks_y, num_blocks_x, tile_size, tile_size, dataset.RasterCount), dtype=np.uint8)
+    
 
     for i in range(num_blocks_y):
         for j in range(num_blocks_x):
@@ -21,13 +23,11 @@ def split_image(image_path, tile_size, overlap):
             if x_end > width:
                 x_end = width
                 x_start = x_end - tile_size
-            for k in range(dataset.RasterCount):
-                band = dataset.GetRasterBand(k+1)
-                tile[i, j, :, :, k] = band.ReadAsArray(x_start, y_start, tile_size, tile_size)
-    process_tile(tile)
+            tile = dataset.ReadAsArray(x_start, y_start, tile_size, tile_size)
+            process_tile(tile)
 
 def process_tile(tile):
-    print('Обработка массива изображений')
+    print('Обработка изображения')
 
 def main():
     image_path = "NHT.tif"
